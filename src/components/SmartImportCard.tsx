@@ -1,7 +1,8 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, AlertCircle } from "lucide-react";
 import FileUploadSection from "./FileUploadSection";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
@@ -14,13 +15,24 @@ interface SmartImportCardProps {
 }
 
 const SmartImportCard = ({ onDataExtracted, llmProvider, llmApiKey }: SmartImportCardProps) => {
-  const canUseAI = llmProvider && llmApiKey;
   const [currentProvider, setCurrentProvider] = useState(llmProvider || 'openai');
   const [currentApiKey, setCurrentApiKey] = useState(llmApiKey || '');
+  const [savedProvider, setSavedProvider] = useState(llmProvider);
+  const [savedApiKey, setSavedApiKey] = useState(llmApiKey);
+
+  useEffect(() => {
+    setSavedProvider(llmProvider);
+    setSavedApiKey(llmApiKey);
+  }, [llmProvider, llmApiKey]);
+
+  const canUseAI = savedProvider && savedApiKey;
+  const hasUnsavedChanges = currentProvider !== savedProvider || currentApiKey !== savedApiKey;
 
   const handleSaveConfig = () => {
     localStorage.setItem("llmProvider", currentProvider);
     localStorage.setItem("llmApiKey", currentApiKey);
+    setSavedProvider(currentProvider);
+    setSavedApiKey(currentApiKey);
     window.location.reload();
   };
 
@@ -45,41 +57,48 @@ const SmartImportCard = ({ onDataExtracted, llmProvider, llmApiKey }: SmartImpor
             <p className="text-sm text-amber-800 mb-4">
               To use the Smart Import features, please provide an API key. Your key will be stored in your browser's local storage and will not be shared.
             </p>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="llmProvider" className="font-medium text-amber-900">AI Provider</Label>
-                 <Select value={currentProvider} onValueChange={setCurrentProvider}>
-                    <SelectTrigger id="llmProvider" className="bg-white">
-                      <SelectValue placeholder="Select a provider" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="openai">OpenAI</SelectItem>
-                      <SelectItem value="groq">Groq</SelectItem>
-                    </SelectContent>
-                  </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="llmApiKey" className="font-medium text-amber-900">API Key</Label>
-                <Input
-                  id="llmApiKey"
-                  type="password"
-                  placeholder="Enter your API key"
-                  value={currentApiKey}
-                  onChange={(e) => setCurrentApiKey(e.target.value)}
-                  className="bg-white"
-                />
-              </div>
-              <Button onClick={handleSaveConfig} className="w-full bg-amber-600 hover:bg-amber-700">
-                Save and Enable AI Features
-              </Button>
+          </div>
+        )}
+
+        {(!canUseAI || hasUnsavedChanges) && (
+          <div className="space-y-4 p-4 border border-gray-200 rounded-xl bg-white">
+            <div className="space-y-2">
+              <Label htmlFor="llmProvider" className="font-medium text-gray-900">AI Provider</Label>
+              <Select value={currentProvider} onValueChange={setCurrentProvider}>
+                <SelectTrigger id="llmProvider" className="bg-white">
+                  <SelectValue placeholder="Select a provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="openai">OpenAI</SelectItem>
+                  <SelectItem value="groq">Groq</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="llmApiKey" className="font-medium text-gray-900">API Key</Label>
+              <Input
+                id="llmApiKey"
+                type="password"
+                placeholder="Enter your API key"
+                value={currentApiKey}
+                onChange={(e) => setCurrentApiKey(e.target.value)}
+                className="bg-white"
+              />
+            </div>
+            <Button 
+              onClick={handleSaveConfig} 
+              className="w-full bg-amber-600 hover:bg-amber-700"
+              disabled={!currentProvider || !currentApiKey}
+            >
+              Save and Enable AI Features
+            </Button>
           </div>
         )}
 
         <FileUploadSection
           onDataExtracted={onDataExtracted}
-          llmProvider={llmProvider}
-          llmApiKey={llmApiKey}
+          llmProvider={savedProvider}
+          llmApiKey={savedApiKey}
           canUseAI={!!canUseAI}
         />
 
