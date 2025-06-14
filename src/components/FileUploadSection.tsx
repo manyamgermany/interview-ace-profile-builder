@@ -20,6 +20,19 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, canUseAI }
   const { isUploading, setIsUploading, uploadSuccess, setUploadSuccess, extractTextFromFile } = useFileExtraction();
   const { isExtracting, setIsExtracting, extractDataWithAI } = useAIExtraction();
 
+  const isValidFileType = (file: File) => {
+    const validTypes = [
+      'application/pdf',
+      'text/plain',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    const validExtensions = ['.pdf', '.txt', '.doc', '.docx'];
+    
+    return validTypes.includes(file.type) || 
+           validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -29,8 +42,8 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, canUseAI }
     setUploadSuccess(false);
 
     try {
-      if (!file.type.includes("pdf") && !file.type.includes("text") && !file.name.endsWith(".txt")) {
-        throw new Error("Please upload a PDF or text file");
+      if (!isValidFileType(file)) {
+        throw new Error("Please upload a PDF, Word document (.doc/.docx), or text file (.txt)");
       }
 
       toast({
@@ -43,6 +56,9 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, canUseAI }
       if (extractedText.length < 50) {
         throw new Error("Could not extract enough text from the file. Please ensure it's a text-based resume.");
       }
+
+      console.log("Extracted text length:", extractedText.length);
+      console.log("First 200 characters:", extractedText.substring(0, 200));
 
       toast({
         title: "Analyzing Content",
@@ -60,9 +76,21 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, canUseAI }
       
     } catch (error) {
       console.error("Resume extraction error:", error);
+      let errorMessage = "Failed to process resume";
+      
+      if (error instanceof Error) {
+        if (error.message.includes("OpenAI API error")) {
+          errorMessage = "AI service error. Please check your API key and try again.";
+        } else if (error.message.includes("Please configure")) {
+          errorMessage = "Please configure your AI provider first";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Upload Failed",
-        description: error instanceof Error ? error.message : "Failed to process resume",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -88,7 +116,7 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, canUseAI }
         <input
           ref={fileInputRef}
           type="file"
-          accept=".pdf,.txt"
+          accept=".pdf,.txt,.doc,.docx"
           onChange={handleFileUpload}
           className="hidden"
           disabled={!canUseAI}
@@ -118,7 +146,7 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, canUseAI }
                 ? "AI is analyzing your resume and extracting relevant information"
                 : uploadSuccess
                 ? "Your profile has been updated with the extracted information"
-                : "Supports PDF and text files • AI will extract and fill your profile automatically"
+                : "Supports PDF, Word (.doc/.docx), and text files • AI will extract and fill your profile automatically"
               }
             </p>
           </div>
