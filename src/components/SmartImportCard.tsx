@@ -3,6 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Sparkles, AlertCircle } from "lucide-react";
 import FileUploadSection from "./FileUploadSection";
 import LinkedInImportSection from "./LinkedInImportSection";
+import { useState } from "react";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Button } from "./ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 interface SmartImportCardProps {
   onDataExtracted: (data: any) => void;
@@ -12,6 +17,14 @@ interface SmartImportCardProps {
 
 const SmartImportCard = ({ onDataExtracted, llmProvider, llmApiKey }: SmartImportCardProps) => {
   const canUseAI = llmProvider && llmApiKey;
+  const [currentProvider, setCurrentProvider] = useState(llmProvider || 'openai');
+  const [currentApiKey, setCurrentApiKey] = useState(llmApiKey || '');
+
+  const handleSaveConfig = () => {
+    localStorage.setItem("llmProvider", currentProvider);
+    localStorage.setItem("llmApiKey", currentApiKey);
+    window.location.reload();
+  };
 
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -26,14 +39,42 @@ const SmartImportCard = ({ onDataExtracted, llmProvider, llmApiKey }: SmartImpor
       </CardHeader>
       <CardContent className="space-y-6">
         {!canUseAI && (
-          <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertCircle size={16} className="text-amber-600" />
-              <span className="font-medium text-amber-900">AI Configuration Required</span>
+          <div className="bg-amber-50 rounded-xl p-6 border border-amber-200">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertCircle size={20} className="text-amber-600" />
+              <span className="font-semibold text-xl text-amber-900">AI Configuration Required</span>
             </div>
-            <p className="text-sm text-amber-800">
-              Please configure your AI provider in the settings above to use smart import features.
+            <p className="text-sm text-amber-800 mb-4">
+              To use the Smart Import features, please provide an API key. Your key will be stored in your browser's local storage and will not be shared.
             </p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="llmProvider" className="font-medium text-amber-900">AI Provider</Label>
+                 <Select value={currentProvider} onValueChange={setCurrentProvider}>
+                    <SelectTrigger id="llmProvider" className="bg-white">
+                      <SelectValue placeholder="Select a provider" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="openai">OpenAI</SelectItem>
+                      <SelectItem value="groq">Groq</SelectItem>
+                    </SelectContent>
+                  </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="llmApiKey" className="font-medium text-amber-900">API Key</Label>
+                <Input
+                  id="llmApiKey"
+                  type="password"
+                  placeholder="Enter your API key"
+                  value={currentApiKey}
+                  onChange={(e) => setCurrentApiKey(e.target.value)}
+                  className="bg-white"
+                />
+              </div>
+              <Button onClick={handleSaveConfig} className="w-full bg-amber-600 hover:bg-amber-700">
+                Save and Enable AI Features
+              </Button>
+            </div>
           </div>
         )}
 
