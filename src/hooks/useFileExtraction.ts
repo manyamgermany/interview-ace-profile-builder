@@ -13,6 +13,28 @@ export const useFileExtraction = () => {
         try {
           if (file.type === "application/pdf") {
             const arrayBuffer = e.target?.result as ArrayBuffer;
+            
+            // Use pdf-parse for better PDF text extraction
+            const pdfParse = await import('pdf-parse');
+            const pdfData = await pdfParse.default(arrayBuffer);
+            
+            const textContent = pdfData.text
+              .replace(/\s+/g, ' ')
+              .trim();
+            
+            resolve(textContent);
+          } else {
+            // Handle text files
+            const textContent = (e.target?.result as string)
+              .replace(/\s+/g, ' ')
+              .trim();
+            resolve(textContent);
+          }
+        } catch (error) {
+          console.error("PDF parsing error:", error);
+          // Fallback to basic extraction if pdf-parse fails
+          try {
+            const arrayBuffer = e.target?.result as ArrayBuffer;
             const uint8Array = new Uint8Array(arrayBuffer);
             const text = new TextDecoder().decode(uint8Array);
             
@@ -21,11 +43,9 @@ export const useFileExtraction = () => {
               .trim();
             
             resolve(textContent);
-          } else {
-            resolve(e.target?.result as string);
+          } catch (fallbackError) {
+            reject(new Error("Failed to extract text from PDF file"));
           }
-        } catch (error) {
-          reject(new Error("Failed to extract text from file"));
         }
       };
       

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,6 @@ import PersonalInfoSection from "@/components/PersonalInfoSection";
 import SkillsSection from "@/components/SkillsSection";
 import ProjectsSection from "@/components/ProjectsSection";
 import CurrentWorkSection from "@/components/CurrentWorkSection";
-import PresentationPreview from "@/components/PresentationPreview";
 import PhotoUploadSection from "@/components/PhotoUploadSection";
 import ThemeSelector from "@/components/ThemeSelector";
 import AchievementsSection from "@/components/AchievementsSection";
@@ -17,92 +17,37 @@ import ReferencesSection from "@/components/ReferencesSection";
 import PracticeMode from "@/components/PracticeMode";
 import LLMProviderSettings from "@/components/LLMProviderSettings";
 import ResumeUpload from "@/components/ResumeUpload";
+import PresentationPreviewModal from "@/components/PresentationPreviewModal";
+import { PresentationProvider, usePresentationContext } from "@/contexts/PresentationContext";
 
-const Index = () => {
+const IndexContent = () => {
   const [activeTab, setActiveTab] = useState("personal");
-  const [selectedTheme, setSelectedTheme] = useState("professional");
-  const [profilePhoto, setProfilePhoto] = useState("");
-  const [personalInfo, setPersonalInfo] = useState({
-    name: "",
-    title: "",
-    email: "",
-    phone: "",
-    summary: "",
-    yearsExperience: ""
-  });
-  const [skills, setSkills] = useState([]);
-  const [projects, setProjects] = useState([]);
-  const [currentWork, setCurrentWork] = useState({
-    company: "",
-    position: "",
-    duration: "",
-    achievements: [],
-    responsibilities: []
-  });
-  const [achievements, setAchievements] = useState([]);
-  const [references, setReferences] = useState([]);
   const [isPracticeMode, setIsPracticeMode] = useState(false);
   const [llmProvider, setLlmProvider] = useState("");
   const [llmApiKey, setLlmApiKey] = useState("");
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
-  const handleDataExtracted = (extractedData: any) => {
-    console.log("Extracted data:", extractedData);
-    
-    // Update personal info
-    if (extractedData.name || extractedData.title || extractedData.email || extractedData.phone || extractedData.summary || extractedData.yearsExperience) {
-      setPersonalInfo(prev => ({
-        ...prev,
-        name: extractedData.name || prev.name,
-        title: extractedData.title || prev.title,
-        email: extractedData.email || prev.email,
-        phone: extractedData.phone || prev.phone,
-        summary: extractedData.summary || prev.summary,
-        yearsExperience: extractedData.yearsExperience || prev.yearsExperience
-      }));
-    }
-
-    // Update skills
-    if (extractedData.skills && Array.isArray(extractedData.skills)) {
-      setSkills(extractedData.skills);
-    }
-
-    // Update projects
-    if (extractedData.projects && Array.isArray(extractedData.projects)) {
-      setProjects(extractedData.projects);
-    }
-
-    // Update current work
-    if (extractedData.currentWork) {
-      setCurrentWork(prev => ({
-        ...prev,
-        ...extractedData.currentWork
-      }));
-    }
-
-    // Update achievements
-    if (extractedData.achievements && Array.isArray(extractedData.achievements)) {
-      setAchievements(extractedData.achievements);
-    }
-  };
-
-  const calculateProgress = () => {
-    let completed = 0;
-    const sections = 7; // Updated for new sections
-    
-    if (personalInfo.name && personalInfo.title && personalInfo.summary) completed += 1;
-    if (profilePhoto) completed += 1;
-    if (skills.length > 0) completed += 1;
-    if (projects.length > 0) completed += 1;
-    if (currentWork.company && currentWork.position) completed += 1;
-    if (achievements.length > 0) completed += 1;
-    if (references.length > 0) completed += 1;
-    
-    return Math.round((completed / sections) * 100);
-  };
-
-  const isReadyForPreview = () => {
-    return personalInfo.name && personalInfo.title && skills.length > 0;
-  };
+  const {
+    personalInfo,
+    setPersonalInfo,
+    skills,
+    setSkills,
+    projects,
+    setProjects,
+    currentWork,
+    setCurrentWork,
+    achievements,
+    setAchievements,
+    references,
+    setReferences,
+    profilePhoto,
+    setProfilePhoto,
+    selectedTheme,
+    setSelectedTheme,
+    handleDataExtracted,
+    calculateProgress,
+    isReadyForPreview
+  } = usePresentationContext();
 
   if (isPracticeMode) {
     return (
@@ -293,7 +238,7 @@ const Index = () => {
                 <Button 
                   className="w-full h-12 text-lg font-semibold" 
                   disabled={!isReadyForPreview()}
-                  onClick={() => setActiveTab("preview")}
+                  onClick={() => setIsPreviewModalOpen(true)}
                 >
                   <Eye size={20} className="mr-2" />
                   Preview Presentation
@@ -348,23 +293,21 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Preview Modal/Section */}
-        {activeTab === "preview" && (
-          <div className="mt-10 animate-fade-in-up">
-            <PresentationPreview 
-              personalInfo={personalInfo}
-              skills={skills}
-              projects={projects}
-              currentWork={currentWork}
-              achievements={achievements}
-              references={references}
-              profilePhoto={profilePhoto}
-              theme={selectedTheme}
-            />
-          </div>
-        )}
+        {/* Preview Modal */}
+        <PresentationPreviewModal 
+          isOpen={isPreviewModalOpen}
+          onClose={() => setIsPreviewModalOpen(false)}
+        />
       </div>
     </div>
+  );
+};
+
+const Index = () => {
+  return (
+    <PresentationProvider>
+      <IndexContent />
+    </PresentationProvider>
   );
 };
 
