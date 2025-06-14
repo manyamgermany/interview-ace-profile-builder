@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, FileText, Loader2, Linkedin, Sparkles } from "lucide-react";
+import { Upload, FileText, Loader2, Linkedin, Sparkles, CheckCircle, AlertCircle } from "lucide-react";
 import { generateContent } from "@/services/llmService";
+import { useToast } from "@/hooks/use-toast";
 
 interface ResumeUploadProps {
   onDataExtracted: (data: any) => void;
@@ -18,7 +19,9 @@ const ResumeUpload = ({ onDataExtracted, llmProvider, llmApiKey }: ResumeUploadP
   const [isExtracting, setIsExtracting] = useState(false);
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [isLinkedinExtracting, setIsLinkedinExtracting] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const extractTextFromFile = async (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -27,20 +30,16 @@ const ResumeUpload = ({ onDataExtracted, llmProvider, llmApiKey }: ResumeUploadP
       reader.onload = async (e) => {
         try {
           if (file.type === "application/pdf") {
-            // For PDF files, we'll extract text using a simple approach
-            // In production, you might want to use a more robust PDF parsing library
             const arrayBuffer = e.target?.result as ArrayBuffer;
             const uint8Array = new Uint8Array(arrayBuffer);
             const text = new TextDecoder().decode(uint8Array);
             
-            // Simple text extraction - look for readable text patterns
             const textContent = text.replace(/[^\x20-\x7E\n\r]/g, ' ')
               .replace(/\s+/g, ' ')
               .trim();
             
             resolve(textContent);
           } else {
-            // For text files
             resolve(e.target?.result as string);
           }
         } catch (error) {
@@ -112,7 +111,6 @@ Return ONLY the JSON object without any markdown formatting or additional text.`
     }
 
     try {
-      // Clean the response to ensure it's valid JSON
       let cleanContent = response.content.trim();
       if (cleanContent.startsWith('```json')) {
         cleanContent = cleanContent.replace(/```json\n?/, '').replace(/```$/, '');
@@ -134,11 +132,17 @@ Return ONLY the JSON object without any markdown formatting or additional text.`
 
     setIsUploading(true);
     setIsExtracting(true);
+    setUploadSuccess(false);
 
     try {
       if (!file.type.includes("pdf") && !file.type.includes("text") && !file.name.endsWith(".txt")) {
         throw new Error("Please upload a PDF or text file");
       }
+
+      toast({
+        title: "Processing Resume",
+        description: "Extracting text from your resume...",
+      });
 
       const extractedText = await extractTextFromFile(file);
       
@@ -146,12 +150,27 @@ Return ONLY the JSON object without any markdown formatting or additional text.`
         throw new Error("Could not extract enough text from the file. Please ensure it's a text-based resume.");
       }
 
+      toast({
+        title: "Analyzing Content",
+        description: "AI is extracting your professional information...",
+      });
+
       const extractedData = await extractDataWithAI(extractedText);
       onDataExtracted(extractedData);
+      setUploadSuccess(true);
+      
+      toast({
+        title: "Success!",
+        description: "Your resume has been processed and profile updated.",
+      });
       
     } catch (error) {
       console.error("Resume extraction error:", error);
-      alert(error instanceof Error ? error.message : "Failed to process resume");
+      toast({
+        title: "Upload Failed",
+        description: error instanceof Error ? error.message : "Failed to process resume",
+        variant: "destructive",
+      });
     } finally {
       setIsUploading(false);
       setIsExtracting(false);
@@ -167,6 +186,11 @@ Return ONLY the JSON object without any markdown formatting or additional text.`
     setIsLinkedinExtracting(true);
     
     try {
+      toast({
+        title: "Importing Profile",
+        description: "Generating demo data based on LinkedIn URL...",
+      });
+
       const prompt = `Based on this LinkedIn profile URL: ${linkedinUrl}, generate realistic professional data for demonstration purposes.
 
 Create a JSON object with:
@@ -210,9 +234,18 @@ Make it realistic and professional. Return ONLY the JSON object.`;
       onDataExtracted(extractedData);
       setLinkedinUrl("");
       
+      toast({
+        title: "Import Successful",
+        description: "Demo profile data has been generated and applied.",
+      });
+      
     } catch (error) {
       console.error("LinkedIn extraction error:", error);
-      alert(error instanceof Error ? error.message : "Failed to import LinkedIn profile");
+      toast({
+        title: "Import Failed",
+        description: error instanceof Error ? error.message : "Failed to import LinkedIn profile",
+        variant: "destructive",
+      });
     } finally {
       setIsLinkedinExtracting(false);
     }
@@ -235,7 +268,7 @@ Make it realistic and professional. Return ONLY the JSON object.`;
         {!canUseAI && (
           <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
             <div className="flex items-center gap-2 mb-2">
-              <Sparkles size={16} className="text-amber-600" />
+              <AlertCircle size={16} className="text-amber-600" />
               <span className="font-medium text-amber-900">AI Configuration Required</span>
             </div>
             <p className="text-sm text-amber-800">
@@ -251,7 +284,10 @@ Make it realistic and professional. Return ONLY the JSON object.`;
             <Label className="text-lg font-semibold">Upload Resume</Label>
           </div>
           
-          <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 transition-colors">
+          <div className={`border-2 border-dashed rounded-xl p-8 text-center transition-all ${
+            uploadSuccess ? 'border-green-400 bg-green-50' : 
+            canUseAI ? 'border-gray-300 hover:border-blue-400' : 'border-gray-200 bg-gray-50'
+          }`}>
             <input
               ref={fileInputRef}
               type="file"
@@ -262,9 +298,13 @@ Make it realistic and professional. Return ONLY the JSON object.`;
             />
             
             <div className="space-y-4">
-              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+              <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center ${
+                uploadSuccess ? 'bg-green-100' : 'bg-blue-100'
+              }`}>
                 {isUploading ? (
                   <Loader2 size={24} className="text-blue-600 animate-spin" />
+                ) : uploadSuccess ? (
+                  <CheckCircle size={24} className="text-green-600" />
                 ) : (
                   <Upload size={24} className="text-blue-600" />
                 )}
@@ -272,11 +312,15 @@ Make it realistic and professional. Return ONLY the JSON object.`;
               
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">
-                  {isExtracting ? "Extracting data..." : "Drop your resume here"}
+                  {isExtracting ? "Extracting data..." : 
+                   uploadSuccess ? "Upload successful!" : 
+                   "Drop your resume here"}
                 </h3>
                 <p className="text-gray-600 mt-1">
                   {isExtracting 
                     ? "AI is analyzing your resume and extracting relevant information"
+                    : uploadSuccess
+                    ? "Your profile has been updated with the extracted information"
                     : "Supports PDF and text files • AI will extract and fill your profile automatically"
                   }
                 </p>
@@ -307,7 +351,13 @@ Make it realistic and professional. Return ONLY the JSON object.`;
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Linkedin size={20} className="text-blue-700" />
-            <Label className="text-lg font-semibold">Import from LinkedIn</Label>
+            <Label className="text-lg font-semibold">Import from LinkedIn (Demo)</Label>
+          </div>
+          
+          <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+            <p className="text-sm text-blue-800">
+              <strong>Note:</strong> This generates demo data for demonstration purposes and does not access real LinkedIn profiles.
+            </p>
           </div>
           
           <div className="space-y-3">
@@ -328,12 +378,12 @@ Make it realistic and professional. Return ONLY the JSON object.`;
               {isLinkedinExtracting ? (
                 <>
                   <Loader2 size={16} className="animate-spin mr-2" />
-                  Importing from LinkedIn...
+                  Generating Demo Data...
                 </>
               ) : (
                 <>
                   <Linkedin size={16} className="mr-2" />
-                  Import Profile
+                  Generate Demo Profile
                 </>
               )}
             </Button>
@@ -345,8 +395,9 @@ Make it realistic and professional. Return ONLY the JSON object.`;
           <ul className="text-sm text-green-800 space-y-1">
             <li>• AI automatically extracts personal information, skills, and experience</li>
             <li>• Supports PDF and text resume formats</li>
-            <li>• LinkedIn import for seamless profile creation</li>
+            <li>• LinkedIn import generates realistic demo data</li>
             <li>• All data can be edited and refined after import</li>
+            <li>• Your data is processed securely with your chosen AI provider</li>
           </ul>
         </div>
       </CardContent>
