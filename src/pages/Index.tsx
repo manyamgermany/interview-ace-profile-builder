@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,12 +19,11 @@ import ResumeUpload from "@/components/ResumeUpload";
 import PresentationPreviewModal from "@/components/PresentationPreviewModal";
 import JobDetailsSection from "@/components/JobDetailsSection";
 import { PresentationProvider, usePresentationContext } from "@/contexts/PresentationContext";
+import { LLMProvider } from "@/contexts/LLMContext";
 
 const IndexContent = () => {
   const [activeTab, setActiveTab] = useState("personal");
   const [isPracticeMode, setIsPracticeMode] = useState(false);
-  const [llmProvider, setLlmProvider] = useState("");
-  const [llmApiKey, setLlmApiKey] = useState("");
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   const {
@@ -80,17 +78,8 @@ const IndexContent = () => {
 
         <div className="grid lg:grid-cols-5 gap-12">
           <div className="lg:col-span-3 space-y-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <LLMProviderSettings 
-              selectedProvider={llmProvider}
-              apiKey={llmApiKey}
-              onProviderChange={setLlmProvider}
-              onApiKeyChange={setLlmApiKey}
-            />
-            <ResumeUpload 
-              onDataExtracted={handleDataExtracted}
-              llmProvider={llmProvider}
-              llmApiKey={llmApiKey}
-            />
+            <LLMProviderSettings />
+            <ResumeUpload onDataExtracted={handleDataExtracted} />
             <JobDetailsSection />
             <ThemeSelector selectedTheme={selectedTheme} onThemeChange={setSelectedTheme} />
 
@@ -198,9 +187,11 @@ const IndexContent = () => {
 
 const Index = () => {
   return (
-    <PresentationProvider>
-      <IndexContent />
-    </PresentationProvider>
+    <LLMProvider>
+      <PresentationProvider>
+        <IndexContent />
+      </PresentationProvider>
+    </LLMProvider>
   );
 };
 
