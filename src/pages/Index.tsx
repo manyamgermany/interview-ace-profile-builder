@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,11 +20,13 @@ import PresentationPreviewModal from "@/components/PresentationPreviewModal";
 import JobDetailsSection from "@/components/JobDetailsSection";
 import { PresentationProvider, usePresentationContext } from "@/contexts/PresentationContext";
 import { LLMProvider } from "@/contexts/LLMContext";
+import ExportModal from "@/components/ExportModal";
 
 const IndexContent = () => {
   const [activeTab, setActiveTab] = useState("personal");
   const [isPracticeMode, setIsPracticeMode] = useState(false);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const {
     personalInfo,
@@ -159,9 +160,9 @@ const IndexContent = () => {
                   <Bot size={20} className="mr-2" />
                   Practice Mode
                 </Button>
-                <Button variant="outline" className="w-full h-12 text-lg border-sky-400/40 text-sky-300 hover:bg-sky-500/10 hover:text-sky-200" disabled={calculateProgress() < 75}>
+                <Button variant="outline" className="w-full h-12 text-lg border-sky-400/40 text-sky-300 hover:bg-sky-500/10 hover:text-sky-200" disabled={calculateProgress() < 75} onClick={() => setIsExportModalOpen(true)}>
                   <Download size={20} className="mr-2" />
-                  Export PDF
+                  Export Presentation
                 </Button>
                 <div className="pt-6 border-t border-slate-700">
                   <h4 className="font-bold mb-4 text-lg text-white">💡 Pro Tips:</h4>
@@ -181,6 +182,21 @@ const IndexContent = () => {
         <PresentationPreviewModal 
           isOpen={isPreviewModalOpen}
           onClose={() => setIsPreviewModalOpen(false)}
+        />
+
+        <ExportModal
+          isOpen={isExportModalOpen}
+          onClose={() => setIsExportModalOpen(false)}
+          data={{
+            personalInfo,
+            skills,
+            projects,
+            currentWork,
+            achievements,
+            references,
+            profilePhoto,
+            theme: selectedTheme
+          }}
         />
       </div>
     </div>
