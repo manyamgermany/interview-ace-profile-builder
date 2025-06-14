@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -81,7 +82,6 @@ const IndexContent = () => {
             <LLMProviderSettings />
             <ResumeUpload onDataExtracted={handleDataExtracted} />
             <JobDetailsSection />
-            <ThemeSelector selectedTheme={selectedTheme} onThemeChange={setSelectedTheme} />
 
             <Card className="border-slate-700 bg-slate-800/50 shadow-lg backdrop-blur-md">
               <CardHeader>
@@ -135,6 +135,8 @@ const IndexContent = () => {
               <TabsContent value="achievements" className="mt-6"><AchievementsSection achievements={achievements} setAchievements={setAchievements} /></TabsContent>
               <TabsContent value="references" className="mt-6"><ReferencesSection references={references} setReferences={setReferences} /></TabsContent>
             </Tabs>
+
+            <ThemeSelector selectedTheme={selectedTheme} onThemeChange={setSelectedTheme} />
           </div>
 
           <aside className="lg:col-span-2 lg:sticky top-8 self-start animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
