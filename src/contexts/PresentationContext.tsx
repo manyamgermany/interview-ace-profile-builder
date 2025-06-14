@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction } from 'react';
 
 export interface PersonalInfo {
   name: string;
@@ -55,6 +55,12 @@ export interface Reference {
   testimonial: string;
 }
 
+export interface JobDetails {
+  jobTitle: string;
+  company: string;
+  jobDescription: string;
+}
+
 interface PresentationContextType {
   personalInfo: PersonalInfo;
   setPersonalInfo: (info: PersonalInfo) => void;
@@ -72,6 +78,8 @@ interface PresentationContextType {
   setProfilePhoto: (photo: string) => void;
   selectedTheme: string;
   setSelectedTheme: (theme: string) => void;
+  jobDetails: JobDetails;
+  setJobDetails: Dispatch<SetStateAction<JobDetails>>;
   handleDataExtracted: (data: any) => void;
   calculateProgress: () => number;
   isReadyForPreview: () => boolean;
@@ -113,6 +121,11 @@ export const PresentationProvider = ({ children }: PresentationProviderProps) =>
   const [references, setReferences] = useState<Reference[]>([]);
   const [profilePhoto, setProfilePhoto] = useState("");
   const [selectedTheme, setSelectedTheme] = useState("professional");
+  const [jobDetails, setJobDetails] = useState<JobDetails>({
+    jobTitle: "",
+    company: "",
+    jobDescription: "",
+  });
 
   const handleDataExtracted = (extractedData: any) => {
     console.log("Extracted data:", extractedData);
@@ -174,8 +187,9 @@ export const PresentationProvider = ({ children }: PresentationProviderProps) =>
 
   const calculateProgress = () => {
     let completed = 0;
-    const sections = 7;
+    const sections = 8;
     
+    if (jobDetails.jobTitle && jobDetails.company && jobDetails.jobDescription) completed += 1;
     if (personalInfo.name && personalInfo.title && personalInfo.summary) completed += 1;
     if (profilePhoto) completed += 1;
     if (skills.length > 0) completed += 1;
@@ -209,6 +223,8 @@ export const PresentationProvider = ({ children }: PresentationProviderProps) =>
       setProfilePhoto,
       selectedTheme,
       setSelectedTheme,
+      jobDetails,
+      setJobDetails,
       handleDataExtracted,
       calculateProgress,
       isReadyForPreview
