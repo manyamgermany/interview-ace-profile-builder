@@ -1,3 +1,4 @@
+import { withRetry, isRetryableError } from './apiUtils';
 
 interface LLMResponse {
   content: string;
@@ -18,21 +19,43 @@ export const generateContent = async ({
   model 
 }: LLMRequest): Promise<LLMResponse> => {
   try {
-    switch (provider) {
-      case 'openai':
-        return await callOpenAI(apiKey, prompt, model || 'gpt-4.1-2025-04-14');
-      case 'anthropic':
-        return await callAnthropic(apiKey, prompt, model || 'claude-sonnet-4-20250514');
-      case 'google':
-        return await callGoogleGemini(apiKey, prompt, model || 'gemini-pro');
-      default:
-        return { content: '', error: 'Unsupported provider' };
-    }
+    const result = await withRetry(async () => {
+      switch (provider) {
+        case 'openai':
+          return await callOpenAI(apiKey, prompt, model || 'gpt-4.1-2025-04-14');
+        case 'anthropic':
+          return await callAnthropic(apiKey, prompt, model || 'claude-sonnet-4-20250514');
+        case 'google':
+          return await callGoogleGemini(apiKey, prompt, model || 'gemini-pro');
+        default:
+          throw new Error('Unsupported provider');
+      }
+    }, {
+      maxRetries: 2,
+      delay: 1000,
+      backoff: 2
+    });
+    
+    return result;
   } catch (error) {
     console.error('LLM API Error:', error);
+    
+    let errorMessage = 'Unknown error occurred';
+    if (error instanceof Error) {
+      if (error.message.includes('401') || error.message.includes('403')) {
+        errorMessage = 'Invalid API key. Please check your credentials.';
+      } else if (error.message.includes('429')) {
+        errorMessage = 'Rate limit exceeded. Please try again later.';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Request timed out. Please try again.';
+      } else {
+        errorMessage = error.message;
+      }
+    }
+    
     return { 
       content: '', 
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
+      error: errorMessage
     };
   }
 };
@@ -56,13 +79,14 @@ const callOpenAI = async (apiKey: string, prompt: string, model: string): Promis
           content: prompt
         }
       ],
-      max_tokens: 500,
+      max_tokens: 1000, // Increased from 500
       temperature: 0.7,
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.statusText}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(`OpenAI API error (${response.status}): ${errorData.error?.message || response.statusText}`);
   }
 
   const data = await response.json();
@@ -79,7 +103,7 @@ const callAnthropic = async (apiKey: string, prompt: string, model: string): Pro
     },
     body: JSON.stringify({
       model,
-      max_tokens: 500,
+      max_tokens: 1000, // Increased from 500
       messages: [
         {
           role: 'user',
@@ -91,7 +115,8 @@ const callAnthropic = async (apiKey: string, prompt: string, model: string): Pro
   });
 
   if (!response.ok) {
-    throw new Error(`Anthropic API error: ${response.statusText}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(`Anthropic API error (${response.status}): ${errorData.error?.message || response.statusText}`);
   }
 
   const data = await response.json();
@@ -116,13 +141,14 @@ const callGoogleGemini = async (apiKey: string, prompt: string, model: string): 
       ],
       generationConfig: {
         temperature: 0.7,
-        maxOutputTokens: 500,
+        maxOutputTokens: 1000, // Increased from 500
       }
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`Google Gemini API error: ${response.statusText}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(`Google Gemini API error (${response.status}): ${errorData.error?.message || response.statusText}`);
   }
 
   const data = await response.json();

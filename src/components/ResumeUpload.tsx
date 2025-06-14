@@ -1,19 +1,16 @@
 
 import SmartImportCard from "./SmartImportCard";
+import ErrorBoundary from "./ErrorBoundary";
 
 interface ResumeUploadProps {
   onDataExtracted: (data: any) => void;
-  llmProvider: string;
-  llmApiKey: string;
 }
 
-const ResumeUpload = ({ onDataExtracted, llmProvider, llmApiKey }: ResumeUploadProps) => {
+const ResumeUpload = ({ onDataExtracted }: ResumeUploadProps) => {
   return (
-    <SmartImportCard
-      onDataExtracted={onDataExtracted}
-      llmProvider={llmProvider}
-      llmApiKey={llmApiKey}
-    />
+    <ErrorBoundary>
+      <SmartImportCard onDataExtracted={onDataExtracted} />
+    </ErrorBoundary>
   );
 };
 
