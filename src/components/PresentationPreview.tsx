@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Phone, Code, Target, Briefcase, Download, Share2, Star } from "lucide-react";
+import { User, Mail, Phone, Code, Target, Briefcase, Download, Share2, Star, Award, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface PresentationPreviewProps {
@@ -34,9 +34,22 @@ interface PresentationPreviewProps {
     achievements: string[];
     responsibilities: string[];
   };
+  achievements?: any[];
+  references?: any[];
+  profilePhoto?: string;
+  theme?: string;
 }
 
-const PresentationPreview = ({ personalInfo, skills, projects, currentWork }: PresentationPreviewProps) => {
+const PresentationPreview = ({ 
+  personalInfo, 
+  skills, 
+  projects, 
+  currentWork, 
+  achievements = [], 
+  references = [], 
+  profilePhoto = "", 
+  theme = "professional" 
+}: PresentationPreviewProps) => {
   const { toast } = useToast();
 
   const handleExport = () => {
@@ -52,6 +65,37 @@ const PresentationPreview = ({ personalInfo, skills, projects, currentWork }: Pr
       description: "You'll be able to share your presentation link with others soon.",
     });
   };
+
+  const getThemeColors = (theme: string) => {
+    switch (theme) {
+      case "creative":
+        return {
+          primary: "from-purple-900 to-pink-900",
+          accent: "text-pink-300",
+          badge: "bg-purple-100 text-purple-800 border-purple-300"
+        };
+      case "tech":
+        return {
+          primary: "from-emerald-900 to-cyan-900",
+          accent: "text-cyan-300",
+          badge: "bg-emerald-100 text-emerald-800 border-emerald-300"
+        };
+      case "executive":
+        return {
+          primary: "from-gray-900 to-amber-900",
+          accent: "text-amber-300",
+          badge: "bg-amber-100 text-amber-800 border-amber-300"
+        };
+      default:
+        return {
+          primary: "from-gray-900 to-black",
+          accent: "text-sky-300",
+          badge: "bg-sky-100 text-sky-800 border-sky-300"
+        };
+    }
+  };
+
+  const themeColors = getThemeColors(theme);
 
   const groupedSkills = skills.reduce((acc, skill) => {
     if (!acc[skill.category]) {
@@ -89,21 +133,25 @@ const PresentationPreview = ({ personalInfo, skills, projects, currentWork }: Pr
 
       <div className="p-6 sm:p-10 space-y-10">
         {/* Slide 1: Personal Introduction */}
-        <Card className="bg-gradient-to-br from-gray-900 to-black text-white shadow-xl rounded-2xl overflow-hidden">
+        <Card className={`bg-gradient-to-br ${themeColors.primary} text-white shadow-xl rounded-2xl overflow-hidden`}>
           <CardContent className="p-8 sm:p-12 text-center relative">
              <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50"></div>
             <div className="relative">
-              <div className="w-32 h-32 bg-white/10 rounded-full mx-auto mb-6 flex items-center justify-center ring-4 ring-white/20 backdrop-blur-sm">
-                <User size={56} className="text-white" />
+              <div className="w-32 h-32 bg-white/10 rounded-full mx-auto mb-6 flex items-center justify-center ring-4 ring-white/20 backdrop-blur-sm overflow-hidden">
+                {profilePhoto ? (
+                  <img src={profilePhoto} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <User size={56} className="text-white" />
+                )}
               </div>
               <h1 className="text-5xl font-extrabold mb-2 tracking-tight">{personalInfo.name || "Your Name"}</h1>
-              <p className="text-2xl mb-4 text-sky-300">{personalInfo.title || "Your Professional Title"}</p>
+              <p className={`text-2xl mb-4 ${themeColors.accent}`}>{personalInfo.title || "Your Professional Title"}</p>
               {personalInfo.yearsExperience && (
                 <Badge variant="secondary" className="bg-white/20 text-white border-transparent text-base">
                   {personalInfo.yearsExperience} of Experience
                 </Badge>
               )}
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-x-6 gap-y-2 mt-8 text-sky-200">
+              <div className={`flex flex-col sm:flex-row justify-center items-center gap-x-6 gap-y-2 mt-8 ${themeColors.accent}`}>
                 {personalInfo.email && (
                   <div className="flex items-center gap-2">
                     <Mail size={16} />
@@ -250,6 +298,65 @@ const PresentationPreview = ({ personalInfo, skills, projects, currentWork }: Pr
                           </li>
                         ))}
                       </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* New Achievements Section */}
+        {achievements.length > 0 && (
+          <Card>
+            <CardHeader className="bg-gray-50 border-b">
+              <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
+                <Award size={24} />
+                Awards & Achievements
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-8">
+              <div className="grid md:grid-cols-2 gap-6">
+                {achievements.slice(0, 4).map((achievement, index) => (
+                  <div key={index} className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200">
+                    <div className="flex items-start gap-3 mb-3">
+                      <Award size={20} className="text-yellow-600 mt-1" />
+                      <div>
+                        <h3 className="font-bold text-lg text-gray-900">{achievement.title}</h3>
+                        <p className="text-gray-600">{achievement.organization}</p>
+                        {achievement.date && <p className="text-sm text-gray-500">{achievement.date}</p>}
+                      </div>
+                    </div>
+                    {achievement.description && (
+                      <p className="text-gray-700 text-sm">{achievement.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* New References Section */}
+        {references.length > 0 && (
+          <Card>
+            <CardHeader className="bg-gray-50 border-b">
+              <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
+                <Users size={24} />
+                Professional References
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-8">
+              <div className="grid md:grid-cols-2 gap-6">
+                {references.slice(0, 4).map((reference, index) => (
+                  <div key={index} className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+                    <h3 className="font-bold text-lg mb-1">{reference.name}</h3>
+                    <p className="text-gray-600 mb-2">{reference.title}</p>
+                    <p className="text-sm text-blue-600 font-medium mb-3">{reference.company}</p>
+                    {reference.testimonial && (
+                      <blockquote className="text-sm text-gray-700 italic border-l-4 border-blue-500 pl-4">
+                        "{reference.testimonial}"
+                      </blockquote>
                     )}
                   </div>
                 ))}
