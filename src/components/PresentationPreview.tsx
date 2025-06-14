@@ -20,6 +20,7 @@ interface PresentationPreviewProps {
   }>;
   projects: Array<{
     name: string;
+    title: string;
     description: string;
     technologies: string[];
     role: string;
@@ -34,8 +35,24 @@ interface PresentationPreviewProps {
     achievements: string[];
     responsibilities: string[];
   };
-  achievements?: any[];
-  references?: any[];
+  achievements?: Array<{
+    title: string;
+    description: string;
+    year: string;
+    organization: string;
+    date: string;
+    type: string;
+  }>;
+  references?: Array<{
+    name: string;
+    position: string;
+    title: string;
+    company: string;
+    email: string;
+    phone: string;
+    relationship: string;
+    testimonial: string;
+  }>;
   profilePhoto?: string;
   theme?: string;
 }

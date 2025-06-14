@@ -13,12 +13,18 @@ export interface PersonalInfo {
 export interface Skill {
   name: string;
   level: string;
+  category: string;
 }
 
 export interface Project {
+  name: string;
   title: string;
   description: string;
   technologies: string[];
+  role: string;
+  duration: string;
+  achievements: string[];
+  link?: string;
 }
 
 export interface CurrentWork {
@@ -33,14 +39,20 @@ export interface Achievement {
   title: string;
   description: string;
   year: string;
+  organization: string;
+  date: string;
+  type: string;
 }
 
 export interface Reference {
   name: string;
   position: string;
+  title: string;
   company: string;
   email: string;
   phone: string;
+  relationship: string;
+  testimonial: string;
 }
 
 interface PresentationContextType {
@@ -118,11 +130,26 @@ export const PresentationProvider = ({ children }: PresentationProviderProps) =>
     }
 
     if (extractedData.skills && Array.isArray(extractedData.skills)) {
-      setSkills(extractedData.skills);
+      const skillsWithCategory = extractedData.skills.map((skill: any) => ({
+        name: skill.name || skill,
+        level: skill.level || "Intermediate",
+        category: skill.category || "Technical"
+      }));
+      setSkills(skillsWithCategory);
     }
 
     if (extractedData.projects && Array.isArray(extractedData.projects)) {
-      setProjects(extractedData.projects);
+      const projectsWithRequiredFields = extractedData.projects.map((project: any) => ({
+        name: project.name || project.title || "Untitled Project",
+        title: project.title || project.name || "Untitled Project",
+        description: project.description || "",
+        technologies: project.technologies || [],
+        role: project.role || "Developer",
+        duration: project.duration || "Not specified",
+        achievements: project.achievements || [],
+        link: project.link
+      }));
+      setProjects(projectsWithRequiredFields);
     }
 
     if (extractedData.currentWork) {
@@ -133,7 +160,15 @@ export const PresentationProvider = ({ children }: PresentationProviderProps) =>
     }
 
     if (extractedData.achievements && Array.isArray(extractedData.achievements)) {
-      setAchievements(extractedData.achievements);
+      const achievementsWithRequiredFields = extractedData.achievements.map((achievement: any) => ({
+        title: achievement.title || "Achievement",
+        description: achievement.description || "",
+        year: achievement.year || achievement.date || "Unknown",
+        organization: achievement.organization || "Unknown",
+        date: achievement.date || achievement.year || "Unknown",
+        type: achievement.type || "Professional"
+      }));
+      setAchievements(achievementsWithRequiredFields);
     }
   };
 
