@@ -1,9 +1,9 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { User, Mail, Phone, Briefcase } from "lucide-react";
+import AIEnhancedInput from "./AIEnhancedInput";
 
 interface PersonalInfoSectionProps {
   personalInfo: {
@@ -15,15 +15,22 @@ interface PersonalInfoSectionProps {
     yearsExperience: string;
   };
   setPersonalInfo: (info: any) => void;
+  llmProvider?: string;
+  llmApiKey?: string;
 }
 
-const PersonalInfoSection = ({ personalInfo, setPersonalInfo }: PersonalInfoSectionProps) => {
+const PersonalInfoSection = ({ 
+  personalInfo, 
+  setPersonalInfo,
+  llmProvider = "",
+  llmApiKey = ""
+}: PersonalInfoSectionProps) => {
   const handleInputChange = (field: string, value: string) => {
     setPersonalInfo(prev => ({ ...prev, [field]: value }));
   };
 
   return (
-    <Card>
+    <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <User size={20} />
@@ -34,7 +41,7 @@ const PersonalInfoSection = ({ personalInfo, setPersonalInfo }: PersonalInfoSect
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-6">
           <div>
             <Label htmlFor="name">Full Name *</Label>
             <Input
@@ -55,7 +62,7 @@ const PersonalInfoSection = ({ personalInfo, setPersonalInfo }: PersonalInfoSect
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-6">
           <div>
             <Label htmlFor="email">Email</Label>
             <div className="relative">
@@ -85,6 +92,18 @@ const PersonalInfoSection = ({ personalInfo, setPersonalInfo }: PersonalInfoSect
           </div>
         </div>
 
+        <div className="space-y-3">
+          <AIEnhancedInput
+            value={personalInfo.summary}
+            onChange={(value) => handleInputChange('summary', value)}
+            placeholder="Write a compelling professional summary that highlights your key achievements and value proposition..."
+            label="Professional Summary"
+            aiPromptTemplate="Enhance this professional summary to make it more compelling and interview-ready. Current summary: {current_value}. Make it concise, impactful, and highlight key achievements and value proposition."
+            provider={llmProvider}
+            apiKey={llmApiKey}
+          />
+        </div>
+
         <div>
           <Label htmlFor="experience">Years of Experience</Label>
           <div className="relative">
@@ -97,21 +116,6 @@ const PersonalInfoSection = ({ personalInfo, setPersonalInfo }: PersonalInfoSect
               onChange={(e) => handleInputChange("yearsExperience", e.target.value)}
             />
           </div>
-        </div>
-
-        <div>
-          <Label htmlFor="summary">Professional Summary *</Label>
-          <Textarea
-            id="summary"
-            placeholder="Write a compelling 2-3 sentence summary that highlights your key strengths, experience, and what makes you unique as a candidate..."
-            rows={4}
-            value={personalInfo.summary}
-            onChange={(e) => handleInputChange("summary", e.target.value)}
-            className="resize-none"
-          />
-          <p className="text-sm text-gray-500 mt-1">
-            {personalInfo.summary.length}/400 characters - Keep it concise and impactful
-          </p>
         </div>
 
         <div className="bg-sky-50 p-4 rounded-lg border border-sky-200">

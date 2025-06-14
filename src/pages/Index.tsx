@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ import ThemeSelector from "@/components/ThemeSelector";
 import AchievementsSection from "@/components/AchievementsSection";
 import ReferencesSection from "@/components/ReferencesSection";
 import PracticeMode from "@/components/PracticeMode";
+import LLMProviderSettings from "@/components/LLMProviderSettings";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("personal");
@@ -41,6 +41,8 @@ const Index = () => {
   const [achievements, setAchievements] = useState([]);
   const [references, setReferences] = useState([]);
   const [isPracticeMode, setIsPracticeMode] = useState(false);
+  const [llmProvider, setLlmProvider] = useState("");
+  const [llmApiKey, setLlmApiKey] = useState("");
 
   const calculateProgress = () => {
     let completed = 0;
@@ -88,6 +90,16 @@ const Index = () => {
           <p className="text-2xl text-slate-600 max-w-4xl mx-auto font-medium">
             Create stunning, professional presentations that showcase your expertise and land you the job of your dreams.
           </p>
+        </div>
+
+        {/* LLM Provider Settings */}
+        <div className="animate-fade-in-up mb-8" style={{ animationDelay: '0.05s' }}>
+          <LLMProviderSettings 
+            selectedProvider={llmProvider}
+            apiKey={llmApiKey}
+            onProviderChange={setLlmProvider}
+            onApiKeyChange={setLlmApiKey}
+          />
         </div>
 
         {/* Theme Selector */}
@@ -166,6 +178,8 @@ const Index = () => {
                 <PersonalInfoSection 
                   personalInfo={personalInfo}
                   setPersonalInfo={setPersonalInfo}
+                  llmProvider={llmProvider}
+                  llmApiKey={llmApiKey}
                 />
               </TabsContent>
 
