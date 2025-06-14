@@ -114,13 +114,13 @@ const PersonalInfoSection = ({ personalInfo, setPersonalInfo }: PersonalInfoSect
           </p>
         </div>
 
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h4 className="font-semibold text-blue-900 mb-2">💡 Writing Tips</h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>• Start with your years of experience and key expertise</li>
-            <li>• Mention your most relevant skills for the target role</li>
-            <li>• Include a notable achievement or unique value proposition</li>
-            <li>• End with your career goal or what you're seeking</li>
+        <div className="bg-sky-50 p-4 rounded-lg border border-sky-200">
+          <h4 className="font-semibold text-sky-900 mb-2">💡 Writing Tips</h4>
+          <ul className="text-sm text-sky-800 space-y-1 list-disc list-inside">
+            <li>Start with your years of experience and key expertise</li>
+            <li>Mention your most relevant skills for the target role</li>
+            <li>Include a notable achievement or unique value proposition</li>
+            <li>End with your career goal or what you're seeking</li>
           </ul>
         </div>
       </CardContent>

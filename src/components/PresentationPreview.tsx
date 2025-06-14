@@ -1,8 +1,7 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Phone, Code, Target, Briefcase, Download, Share2 } from "lucide-react";
+import { User, Mail, Phone, Code, Target, Briefcase, Download, Share2, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface PresentationPreviewProps {
@@ -64,232 +63,222 @@ const PresentationPreview = ({ personalInfo, skills, projects, currentWork }: Pr
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case "Expert": return "bg-green-500 text-white";
-      case "Advanced": return "bg-blue-500 text-white"; 
-      case "Intermediate": return "bg-yellow-500 text-white";
-      case "Beginner": return "bg-gray-500 text-white";
-      default: return "bg-gray-500 text-white";
+      case "Expert": return "bg-emerald-100 text-emerald-800 border-emerald-300";
+      case "Advanced": return "bg-sky-100 text-sky-800 border-sky-300"; 
+      case "Intermediate": return "bg-amber-100 text-amber-800 border-amber-300";
+      case "Beginner": return "bg-slate-100 text-slate-800 border-slate-300";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">Presentation Preview</h2>
+    <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border">
+      <div className="p-6 sm:p-8 bg-gray-50 border-b flex flex-col sm:flex-row justify-between items-center gap-4">
+        <h2 className="text-2xl font-bold text-gray-800">Presentation Preview</h2>
         <div className="flex justify-center gap-4">
-          <Button onClick={handleExport} className="flex items-center gap-2">
-            <Download size={16} />
+          <Button onClick={handleExport}>
+            <Download size={16} className="mr-2" />
             Export PDF
           </Button>
-          <Button variant="outline" onClick={handleShare} className="flex items-center gap-2">
-            <Share2 size={16} />
+          <Button variant="outline" onClick={handleShare}>
+            <Share2 size={16} className="mr-2" />
             Share Link
           </Button>
         </div>
       </div>
 
-      {/* Slide 1: Personal Introduction */}
-      <Card className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
-        <CardContent className="p-8 text-center">
-          <div className="w-32 h-32 bg-white/20 rounded-full mx-auto mb-6 flex items-center justify-center">
-            <User size={48} className="text-white" />
-          </div>
-          <h1 className="text-4xl font-bold mb-2">{personalInfo.name || "Your Name"}</h1>
-          <p className="text-xl mb-4 text-blue-100">{personalInfo.title || "Your Professional Title"}</p>
-          {personalInfo.yearsExperience && (
-            <p className="text-lg text-blue-200">{personalInfo.yearsExperience} of Experience</p>
-          )}
-          <div className="flex justify-center gap-6 mt-6 text-blue-200">
-            {personalInfo.email && (
-              <div className="flex items-center gap-2">
-                <Mail size={16} />
-                <span>{personalInfo.email}</span>
+      <div className="p-6 sm:p-10 space-y-10">
+        {/* Slide 1: Personal Introduction */}
+        <Card className="bg-gradient-to-br from-gray-900 to-black text-white shadow-xl rounded-2xl overflow-hidden">
+          <CardContent className="p-8 sm:p-12 text-center relative">
+             <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50"></div>
+            <div className="relative">
+              <div className="w-32 h-32 bg-white/10 rounded-full mx-auto mb-6 flex items-center justify-center ring-4 ring-white/20 backdrop-blur-sm">
+                <User size={56} className="text-white" />
               </div>
-            )}
-            {personalInfo.phone && (
-              <div className="flex items-center gap-2">
-                <Phone size={16} />
-                <span>{personalInfo.phone}</span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Slide 2: Professional Summary */}
-      {personalInfo.summary && (
-        <Card>
-          <CardHeader className="bg-slate-50">
-            <CardTitle className="text-2xl text-center">Professional Summary</CardTitle>
-          </CardHeader>
-          <CardContent className="p-8">
-            <p className="text-lg leading-relaxed text-gray-700 text-center max-w-3xl mx-auto">
-              {personalInfo.summary}
-            </p>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Slide 3: Skills & Expertise */}
-      {skills.length > 0 && (
-        <Card>
-          <CardHeader className="bg-slate-50">
-            <CardTitle className="text-2xl text-center flex items-center justify-center gap-2">
-              <Code size={24} />
-              Skills & Expertise
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-8">
-            {Object.entries(groupedSkills).map(([category, categorySkills]) => (
-              <div key={category} className="mb-6 last:mb-0">
-                <h3 className="text-lg font-semibold mb-3 text-gray-800">{category}</h3>
-                <div className="flex flex-wrap gap-3">
-                  {categorySkills.map((skill, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <span className="text-gray-700 font-medium">{skill.name}</span>
-                      <Badge className={getLevelColor(skill.level)}>
-                        {skill.level}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Slide 4: Current Work */}
-      {currentWork.company && currentWork.position && (
-        <Card>
-          <CardHeader className="bg-slate-50">
-            <CardTitle className="text-2xl text-center flex items-center justify-center gap-2">
-              <Briefcase size={24} />
-              Current Role
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-8">
-            <div className="text-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900">{currentWork.position}</h3>
-              <p className="text-lg text-gray-600">{currentWork.company}</p>
-              {currentWork.duration && (
-                <p className="text-gray-500">{currentWork.duration}</p>
+              <h1 className="text-5xl font-extrabold mb-2 tracking-tight">{personalInfo.name || "Your Name"}</h1>
+              <p className="text-2xl mb-4 text-sky-300">{personalInfo.title || "Your Professional Title"}</p>
+              {personalInfo.yearsExperience && (
+                <Badge variant="secondary" className="bg-white/20 text-white border-transparent text-base">
+                  {personalInfo.yearsExperience} of Experience
+                </Badge>
               )}
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              {currentWork.responsibilities.length > 0 && (
-                <div>
-                  <h4 className="font-semibold text-lg mb-3 text-gray-800">Key Responsibilities</h4>
-                  <ul className="space-y-2">
-                    {currentWork.responsibilities.map((responsibility, index) => (
-                      <li key={index} className="flex items-start gap-2 text-gray-700">
-                        <span className="text-blue-500 mt-1">•</span>
-                        <span>{responsibility}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {currentWork.achievements.length > 0 && (
-                <div>
-                  <h4 className="font-semibold text-lg mb-3 text-gray-800">Notable Achievements</h4>
-                  <ul className="space-y-2">
-                    {currentWork.achievements.map((achievement, index) => (
-                      <li key={index} className="flex items-start gap-2 text-gray-700">
-                        <span className="text-green-500 mt-1">🏆</span>
-                        <span>{achievement}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Slide 5: Key Projects */}
-      {projects.length > 0 && (
-        <Card>
-          <CardHeader className="bg-slate-50">
-            <CardTitle className="text-2xl text-center flex items-center justify-center gap-2">
-              <Target size={24} />
-              Key Projects
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-8">
-            <div className="grid gap-6">
-              {projects.slice(0, 3).map((project, index) => (
-                <div key={index} className="border-l-4 border-blue-500 pl-6 py-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-xl font-bold text-gray-900">{project.name}</h3>
-                    <span className="text-sm text-gray-500">{project.duration}</span>
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-x-6 gap-y-2 mt-8 text-sky-200">
+                {personalInfo.email && (
+                  <div className="flex items-center gap-2">
+                    <Mail size={16} />
+                    <span>{personalInfo.email}</span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">{project.role}</p>
-                  <p className="text-gray-700 mb-3">{project.description}</p>
-                  
-                  {project.technologies.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {project.technologies.map((tech, techIndex) => (
-                        <Badge key={techIndex} variant="outline">{tech}</Badge>
-                      ))}
-                    </div>
-                  )}
+                )}
+                {personalInfo.phone && (
+                  <div className="flex items-center gap-2">
+                    <Phone size={16} />
+                    <span>{personalInfo.phone}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-                  {project.achievements.length > 0 && (
-                    <ul className="text-sm text-gray-700">
-                      {project.achievements.slice(0, 2).map((achievement, achIndex) => (
-                        <li key={achIndex} className="flex items-start gap-2">
-                          <span className="text-green-500">✓</span>
+        {/* Slide 2: Professional Summary */}
+        {personalInfo.summary && (
+          <Card>
+            <CardHeader className="bg-gray-50 border-b">
+              <CardTitle className="text-2xl font-bold text-center">Professional Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="p-8">
+              <p className="text-lg leading-relaxed text-gray-700 text-center max-w-3xl mx-auto font-serif">
+                "{personalInfo.summary}"
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Slide 3: Skills & Expertise */}
+        {skills.length > 0 && (
+          <Card>
+            <CardHeader className="bg-gray-50 border-b">
+              <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
+                <Code size={24} />
+                Skills & Expertise
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-8">
+              {Object.entries(groupedSkills).map(([category, categorySkills]) => (
+                <div key={category} className="mb-6 last:mb-0">
+                  <h3 className="text-xl font-bold mb-4 text-gray-800">{category}</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {categorySkills.map((skill, index) => (
+                      <Badge key={index} className={`text-sm px-3 py-1 border ${getLevelColor(skill.level)}`}>
+                        {skill.name}
+                        <span className="font-normal opacity-70 ml-2 pl-2 border-l border-current">{skill.level}</span>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Slide 4: Current Work */}
+        {currentWork.company && currentWork.position && (
+          <Card>
+            <CardHeader className="bg-gray-50 border-b">
+              <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
+                <Briefcase size={24} />
+                Current Role
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-8">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-gray-900">{currentWork.position}</h3>
+                <p className="text-xl text-gray-600">at {currentWork.company}</p>
+                {currentWork.duration && (
+                  <p className="text-gray-500 mt-1">{currentWork.duration}</p>
+                )}
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8">
+                {currentWork.responsibilities.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-lg mb-3 text-gray-800 border-b pb-2">Key Responsibilities</h4>
+                    <ul className="space-y-2">
+                      {currentWork.responsibilities.map((responsibility, index) => (
+                        <li key={index} className="flex items-start gap-3 text-gray-700">
+                          <span className="text-sky-500 mt-1.5">◆</span>
+                          <span>{responsibility}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {currentWork.achievements.length > 0 && (
+                  <div>
+                    <h4 className="font-semibold text-lg mb-3 text-gray-800 border-b pb-2">Notable Achievements</h4>
+                    <ul className="space-y-2">
+                      {currentWork.achievements.map((achievement, index) => (
+                        <li key={index} className="flex items-start gap-3 text-gray-700">
+                          <Star size={16} className="text-amber-500 mt-1 shrink-0" />
                           <span>{achievement}</span>
                         </li>
                       ))}
                     </ul>
-                  )}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Slide 5: Key Projects */}
+        {projects.length > 0 && (
+          <Card>
+            <CardHeader className="bg-gray-50 border-b">
+              <CardTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2">
+                <Target size={24} />
+                Key Projects
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-8">
+              <div className="space-y-8">
+                {projects.slice(0, 3).map((project, index) => (
+                  <div key={index} className="border-l-4 border-sky-500 pl-6 py-2">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-xl font-bold text-gray-900">{project.name}</h3>
+                      <span className="text-sm text-gray-500 font-medium">{project.duration}</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2 font-semibold">{project.role}</p>
+                    <p className="text-gray-700 mb-4">{project.description}</p>
+                    
+                    {project.technologies.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {project.technologies.map((tech, techIndex) => (
+                          <Badge key={techIndex} variant="outline" className="border-sky-300 text-sky-800">{tech}</Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {project.achievements.length > 0 && (
+                      <ul className="text-sm text-gray-700 space-y-1">
+                        {project.achievements.slice(0, 2).map((achievement, achIndex) => (
+                          <li key={achIndex} className="flex items-start gap-2">
+                            <span className="text-emerald-500">✓</span>
+                            <span>{achievement}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Slide 6: Thank You */}
+        <Card className="bg-gradient-to-br from-indigo-700 to-purple-800 text-white rounded-2xl shadow-xl">
+          <CardContent className="p-12 text-center">
+            <h2 className="text-4xl font-bold mb-4">Thank You</h2>
+            <p className="text-2xl mb-8 text-indigo-200">Questions & Discussion</p>
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-x-8 gap-y-4 text-indigo-200">
+              {personalInfo.email && (
+                <div className="flex items-center gap-2">
+                  <Mail size={20} />
+                  <span>{personalInfo.email}</span>
                 </div>
-              ))}
+              )}
+              {personalInfo.phone && (
+                <div className="flex items-center gap-2">
+                  <Phone size={20} />
+                  <span>{personalInfo.phone}</span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
-      )}
-
-      {/* Slide 6: Thank You */}
-      <Card className="bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
-        <CardContent className="p-12 text-center">
-          <h2 className="text-3xl font-bold mb-4">Thank You</h2>
-          <p className="text-xl mb-6 text-indigo-100">Questions & Discussion</p>
-          <div className="flex justify-center gap-8 text-indigo-200">
-            {personalInfo.email && (
-              <div className="flex items-center gap-2">
-                <Mail size={20} />
-                <span>{personalInfo.email}</span>
-              </div>
-            )}
-            {personalInfo.phone && (
-              <div className="flex items-center gap-2">
-                <Phone size={20} />
-                <span>{personalInfo.phone}</span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="text-center py-8">
-        <p className="text-gray-600 mb-4">Ready to present your professional story?</p>
-        <div className="flex justify-center gap-4">
-          <Button onClick={handleExport} size="lg" className="flex items-center gap-2">
-            <Download size={20} />
-            Download Presentation
-          </Button>
-          <Button variant="outline" onClick={handleShare} size="lg" className="flex items-center gap-2">
-            <Share2 size={20} />
-            Share with Others
-          </Button>
-        </div>
       </div>
     </div>
   );

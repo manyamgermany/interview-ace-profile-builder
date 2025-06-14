@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -46,40 +45,41 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 py-12">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-12 animate-fade-in-up">
+          <h1 className="text-5xl font-extrabold text-gray-800 mb-4">
             Interview Presentation Builder
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Create a compelling presentation that showcases your professional story, 
-            skills, and achievements to ace your next interview
+            Craft a compelling presentation that tells your professional story and lands you the job.
           </p>
         </div>
 
         {/* Progress Bar */}
-        <Card className="mb-8">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Presentation Progress</CardTitle>
-              <Badge variant={calculateProgress() === 100 ? "default" : "secondary"}>
-                {calculateProgress()}% Complete
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Progress value={calculateProgress()} className="w-full" />
-            <p className="text-sm text-gray-600 mt-2">
-              Complete all sections to unlock the preview and export features
-            </p>
-          </CardContent>
-        </Card>
+        <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <Card className="mb-10">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Presentation Progress</CardTitle>
+                <Badge variant={calculateProgress() === 100 ? "default" : "secondary"}>
+                  {calculateProgress()}% Complete
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Progress value={calculateProgress()} className="w-full" />
+              <p className="text-sm text-gray-600 mt-2">
+                Fill out each section to create a stunning, interview-ready presentation.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="personal" className="flex items-center gap-2">
@@ -131,7 +131,7 @@ const Index = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
             <Card className="sticky top-8">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -176,7 +176,7 @@ const Index = () => {
 
         {/* Preview Modal/Section */}
         {activeTab === "preview" && (
-          <div className="mt-8">
+          <div className="mt-10 animate-fade-in-up">
             <PresentationPreview 
               personalInfo={personalInfo}
               skills={skills}
