@@ -41,14 +41,14 @@ const SmartImportCard = ({ onDataExtracted, llmProvider, llmApiKey }: SmartImpor
           onDataExtracted={onDataExtracted}
           llmProvider={llmProvider}
           llmApiKey={llmApiKey}
-          canUseAI={canUseAI}
+          canUseAI={!!canUseAI}
         />
 
         <LinkedInImportSection
           onDataExtracted={onDataExtracted}
           llmProvider={llmProvider}
           llmApiKey={llmApiKey}
-          canUseAI={canUseAI}
+          canUseAI={!!canUseAI}
         />
 
         <div className="bg-green-50 rounded-xl p-4 border border-green-200">
