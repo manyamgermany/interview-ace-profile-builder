@@ -11,10 +11,11 @@ interface FileUploadSectionProps {
   onDataExtracted: (data: any) => void;
   llmProvider: string;
   llmApiKey: string;
+  llmModel?: string;
   canUseAI: boolean;
 }
 
-const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, canUseAI }: FileUploadSectionProps) => {
+const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, llmModel, canUseAI }: FileUploadSectionProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { isUploading, setIsUploading, uploadSuccess, setUploadSuccess, extractTextFromFile } = useFileExtraction();
@@ -65,7 +66,8 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, canUseAI }
         description: "AI is extracting your professional information...",
       });
 
-      const extractedData = await extractDataWithAI(extractedText, llmProvider, llmApiKey);
+      // ---- Pass llmModel!
+      const extractedData = await extractDataWithAI(extractedText, llmProvider, llmApiKey, llmModel);
       onDataExtracted(extractedData);
       setUploadSuccess(true);
       

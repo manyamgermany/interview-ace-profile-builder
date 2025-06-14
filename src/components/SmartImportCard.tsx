@@ -2,6 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, AlertCircle } from "lucide-react";
 import FileUploadSection from "./FileUploadSection";
+import { useMemo } from "react";
 
 interface SmartImportCardProps {
   onDataExtracted: (data: any) => void;
@@ -11,6 +12,15 @@ interface SmartImportCardProps {
 
 const SmartImportCard = ({ onDataExtracted, llmProvider, llmApiKey }: SmartImportCardProps) => {
   const canUseAI = llmProvider && llmApiKey;
+
+  // Read selected model from localStorage (single source of truth)
+  const llmModel = useMemo(() => {
+    try {
+      return localStorage.getItem("llmModel") || "";
+    } catch (e) {
+      return "";
+    }
+  }, []);
 
   return (
     <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -40,6 +50,7 @@ const SmartImportCard = ({ onDataExtracted, llmProvider, llmApiKey }: SmartImpor
           onDataExtracted={onDataExtracted}
           llmProvider={llmProvider}
           llmApiKey={llmApiKey}
+          llmModel={llmModel}
           canUseAI={!!canUseAI}
         />
 

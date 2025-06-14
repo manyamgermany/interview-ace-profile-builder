@@ -1,10 +1,12 @@
+
 import { useState } from "react";
 import { generateContent } from "@/services/llmService";
 
 export const useAIExtraction = () => {
   const [isExtracting, setIsExtracting] = useState(false);
 
-  const extractDataWithAI = async (resumeText: string, llmProvider: string, llmApiKey: string) => {
+  // ADDED: accept model
+  const extractDataWithAI = async (resumeText: string, llmProvider: string, llmApiKey: string, llmModel?: string) => {
     if (!llmProvider || !llmApiKey) {
       throw new Error("Please configure your AI provider first");
     }
@@ -50,7 +52,8 @@ Return ONLY the JSON object without any markdown formatting or additional text.`
     const response = await generateContent({
       provider: llmProvider,
       apiKey: llmApiKey,
-      prompt
+      prompt,
+      model: llmModel // ensure model is always passed if present
     });
 
     if (response.error) {
@@ -73,49 +76,7 @@ Return ONLY the JSON object without any markdown formatting or additional text.`
     }
   };
 
-  const generateLinkedInDemoData = async (linkedinUrl: string, llmProvider: string, llmApiKey: string) => {
-    const prompt = `Based on this LinkedIn profile URL: ${linkedinUrl}, generate realistic professional data for demonstration purposes.
-
-Create a JSON object with:
-{
-  "name": "Professional Name",
-  "title": "Current Job Title",
-  "email": "professional.email@company.com",
-  "phone": "+1 (555) 123-4567",
-  "summary": "Compelling professional summary highlighting key achievements and expertise",
-  "yearsExperience": "X+ years",
-  "skills": [
-    {"name": "Skill Name", "level": "Expert/Advanced/Intermediate"}
-  ],
-  "currentWork": {
-    "company": "Current Company",
-    "position": "Current Position",
-    "duration": "Start Date - Present",
-    "achievements": ["Notable achievement with metrics"],
-    "responsibilities": ["Key responsibility"]
-  }
-}
-
-Make it realistic and professional. Return ONLY the JSON object.`;
-
-    const response = await generateContent({
-      provider: llmProvider,
-      apiKey: llmApiKey,
-      prompt
-    });
-
-    if (response.error) {
-      throw new Error(response.error);
-    }
-
-    let cleanContent = response.content.trim();
-    if (cleanContent.startsWith('```json')) {
-      cleanContent = cleanContent.replace(/```json\n?/, '').replace(/```$/, '');
-    }
-
-    return JSON.parse(cleanContent);
-  };
-
+  // The demo data function can be left as is for now, if we only use real data upload
   return {
     isExtracting,
     setIsExtracting,
