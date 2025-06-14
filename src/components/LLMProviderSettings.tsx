@@ -1,11 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Brain, Eye, EyeOff, Settings, Save } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface LLMProviderSettingsProps {
   selectedProvider: string;
@@ -43,15 +44,40 @@ const LLMProviderSettings = ({
 }: LLMProviderSettingsProps) => {
   const [showApiKey, setShowApiKey] = useState(false);
   const [selectedModel, setSelectedModel] = useState("");
+  const { toast } = useToast();
+
+  // Load saved model on component mount and when provider changes
+  useEffect(() => {
+    try {
+      const savedModel = localStorage.getItem("llmModel") || "";
+      setSelectedModel(savedModel);
+    } catch (e) {
+      console.error("Failed to load saved model:", e);
+    }
+  }, [selectedProvider]);
 
   const handleSaveSettings = () => {
-    localStorage.setItem("llmProvider", selectedProvider);
-    localStorage.setItem("llmApiKey", apiKey);
-    if (selectedModel) {
-      localStorage.setItem("llmModel", selectedModel);
+    try {
+      localStorage.setItem("llmProvider", selectedProvider);
+      localStorage.setItem("llmApiKey", apiKey);
+      if (selectedModel) {
+        localStorage.setItem("llmModel", selectedModel);
+      }
+      
+      toast({
+        title: "Settings Saved",
+        description: "Your AI provider settings have been saved successfully.",
+      });
+      
+      console.log("Settings saved:", { selectedProvider, hasApiKey: !!apiKey, selectedModel });
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save settings. Please try again.",
+        variant: "destructive",
+      });
     }
-    // Show success feedback
-    console.log("Settings saved successfully!");
   };
 
   const currentProvider = providers.find(p => p.id === selectedProvider);
