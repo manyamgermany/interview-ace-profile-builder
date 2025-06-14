@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Brain, Eye, EyeOff, Settings } from "lucide-react";
+import { Brain, Eye, EyeOff, Settings, Save } from "lucide-react";
 
 interface LLMProviderSettingsProps {
   selectedProvider: string;
@@ -42,6 +42,20 @@ const LLMProviderSettings = ({
   onApiKeyChange 
 }: LLMProviderSettingsProps) => {
   const [showApiKey, setShowApiKey] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("");
+
+  const handleSaveSettings = () => {
+    localStorage.setItem("llmProvider", selectedProvider);
+    localStorage.setItem("llmApiKey", apiKey);
+    if (selectedModel) {
+      localStorage.setItem("llmModel", selectedModel);
+    }
+    // Show success feedback
+    console.log("Settings saved successfully!");
+  };
+
+  const currentProvider = providers.find(p => p.id === selectedProvider);
+  const canSave = selectedProvider && apiKey;
 
   return (
     <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
@@ -77,33 +91,64 @@ const LLMProviderSettings = ({
         </div>
 
         {selectedProvider && (
-          <div className="space-y-3">
-            <Label htmlFor="api-key" className="text-sm font-medium">
-              API Key
-            </Label>
-            <div className="relative">
-              <Input
-                id="api-key"
-                type={showApiKey ? "text" : "password"}
-                value={apiKey}
-                onChange={(e) => onApiKeyChange(e.target.value)}
-                placeholder={`Enter your ${providers.find(p => p.id === selectedProvider)?.name} API key`}
-                className="pr-10"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowApiKey(!showApiKey)}
-              >
-                {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
-              </Button>
+          <>
+            <div className="space-y-3">
+              <Label htmlFor="api-key" className="text-sm font-medium">
+                API Key
+              </Label>
+              <div className="relative">
+                <Input
+                  id="api-key"
+                  type={showApiKey ? "text" : "password"}
+                  value={apiKey}
+                  onChange={(e) => onApiKeyChange(e.target.value)}
+                  placeholder={`Enter your ${currentProvider?.name} API key`}
+                  className="pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowApiKey(!showApiKey)}
+                >
+                  {showApiKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500">
+                Your API key is stored locally and never sent to our servers
+              </p>
             </div>
-            <p className="text-xs text-gray-500">
-              Your API key is stored locally and never sent to our servers
-            </p>
-          </div>
+
+            {currentProvider && (
+              <div className="space-y-3">
+                <Label htmlFor="model-select" className="text-sm font-medium">
+                  Select Model
+                </Label>
+                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                  <SelectTrigger id="model-select" className="w-full">
+                    <SelectValue placeholder="Choose a model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {currentProvider.models.map((model) => (
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <Button 
+              onClick={handleSaveSettings}
+              disabled={!canSave}
+              className="w-full bg-purple-600 hover:bg-purple-700"
+            >
+              <Save size={16} className="mr-2" />
+              Save Settings
+            </Button>
+          </>
         )}
 
         {selectedProvider && apiKey && (
