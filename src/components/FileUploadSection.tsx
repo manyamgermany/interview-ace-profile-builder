@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { Upload, FileText, Loader2, CheckCircle, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useFileExtraction } from "@/hooks/useFileExtraction";
@@ -20,9 +21,16 @@ interface FileUploadSectionProps {
 const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, llmModel, canUseAI }: FileUploadSectionProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState("");
   const { toast } = useToast();
   const { isUploading, setIsUploading, uploadSuccess, setUploadSuccess, extractTextFromFile } = useFileExtraction();
   const { isExtracting, setIsExtracting, extractDataWithAI } = useAIExtraction();
+
+  const updateProgress = (percentage: number, step: string) => {
+    setProgress(percentage);
+    setCurrentStep(step);
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -43,35 +51,49 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, llmModel, 
     setIsExtracting(true);
     setUploadSuccess(false);
     setIsCancelling(false);
+    setProgress(0);
+    setCurrentStep("");
 
     try {
+      updateProgress(10, "Starting file processing...");
+      
       toast({
         title: "Processing Resume",
         description: "Extracting text from your resume...",
       });
 
+      updateProgress(25, "Reading file contents...");
       const extractedText = await extractTextFromFile(file);
       
       if (extractedText.length < 50) {
         throw new Error("Could not extract enough text from the file. Please ensure it's a text-based resume.");
       }
 
+      updateProgress(50, "Text extraction completed");
       console.log("Extracted text length:", extractedText.length);
       console.log("First 200 characters:", extractedText.substring(0, 200));
 
+      updateProgress(60, "Connecting to AI service...");
+      
       toast({
         title: "Analyzing Content",
         description: "AI is extracting your professional information...",
       });
 
+      updateProgress(75, "AI analyzing resume content...");
       const extractedData = await extractDataWithAI(extractedText, llmProvider, llmApiKey, llmModel);
+      
+      updateProgress(90, "Processing extracted data...");
       
       // Validate extracted data
       if (!extractedData || typeof extractedData !== 'object') {
         throw new Error("AI extraction returned invalid data format");
       }
 
+      updateProgress(95, "Updating your profile...");
       onDataExtracted(extractedData);
+      
+      updateProgress(100, "Complete!");
       setUploadSuccess(true);
       
       toast({
@@ -100,6 +122,9 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, llmModel, 
         description: errorMessage,
         variant: "destructive",
       });
+      
+      setProgress(0);
+      setCurrentStep("");
     } finally {
       setIsUploading(false);
       setIsExtracting(false);
@@ -112,7 +137,8 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, llmModel, 
 
   const handleCancel = () => {
     setIsCancelling(true);
-    // Note: In a real implementation, you'd need to implement actual cancellation logic
+    setProgress(0);
+    setCurrentStep("");
     toast({
       title: "Processing Cancelled",
       description: "File upload has been cancelled.",
@@ -157,19 +183,26 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, llmModel, 
             
             <div>
               <h3 className="text-lg font-semibold text-gray-900">
-                {isExtracting ? "Extracting data..." : 
+                {isProcessing ? "Processing..." : 
                  uploadSuccess ? "Upload successful!" : 
                  "Drop your resume here"}
               </h3>
               <p className="text-gray-600 mt-1">
-                {isExtracting 
-                  ? "AI is analyzing your resume and extracting relevant information"
+                {isProcessing 
+                  ? currentStep || "Processing your resume..."
                   : uploadSuccess
                   ? "Your profile has been updated with the extracted information"
                   : "Supports PDF, Word (.doc/.docx), and text files • Max 10MB • AI will extract and fill your profile automatically"
                 }
               </p>
             </div>
+            
+            {isProcessing && (
+              <div className="space-y-2">
+                <Progress value={progress} className="w-full h-2" />
+                <p className="text-sm text-gray-500">{progress}% complete</p>
+              </div>
+            )}
             
             <div className="flex gap-2 justify-center">
               <Button
