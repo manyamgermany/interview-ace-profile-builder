@@ -1,14 +1,16 @@
 
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { Upload, FileText, Loader2, CheckCircle, X } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useFileExtraction } from "@/hooks/useFileExtraction";
 import { useAIExtraction } from "@/hooks/useAIExtraction";
+import { useFileUploadProgress } from "@/hooks/useFileUploadProgress";
 import { validateUploadFile } from "@/utils/fileValidation";
 import ErrorBoundary from "./ErrorBoundary";
+import UploadProgress from "./file-upload/UploadProgress";
+import UploadStatus from "./file-upload/UploadStatus";
+import UploadControls from "./file-upload/UploadControls";
 
 interface FileUploadSectionProps {
   onDataExtracted: (data: any) => void;
@@ -21,16 +23,10 @@ interface FileUploadSectionProps {
 const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, llmModel, canUseAI }: FileUploadSectionProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isCancelling, setIsCancelling] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [currentStep, setCurrentStep] = useState("");
   const { toast } = useToast();
   const { isUploading, setIsUploading, uploadSuccess, setUploadSuccess, extractTextFromFile } = useFileExtraction();
   const { isExtracting, setIsExtracting, extractDataWithAI } = useAIExtraction();
-
-  const updateProgress = (percentage: number, step: string) => {
-    setProgress(percentage);
-    setCurrentStep(step);
-  };
+  const { progress, currentStep, updateProgress, resetProgress } = useFileUploadProgress();
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -51,8 +47,7 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, llmModel, 
     setIsExtracting(true);
     setUploadSuccess(false);
     setIsCancelling(false);
-    setProgress(0);
-    setCurrentStep("");
+    resetProgress();
 
     try {
       updateProgress(10, "Starting file processing...");
@@ -123,8 +118,7 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, llmModel, 
         variant: "destructive",
       });
       
-      setProgress(0);
-      setCurrentStep("");
+      resetProgress();
     } finally {
       setIsUploading(false);
       setIsExtracting(false);
@@ -137,12 +131,15 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, llmModel, 
 
   const handleCancel = () => {
     setIsCancelling(true);
-    setProgress(0);
-    setCurrentStep("");
+    resetProgress();
     toast({
       title: "Processing Cancelled",
       description: "File upload has been cancelled.",
     });
+  };
+
+  const handleFileSelect = () => {
+    fileInputRef.current?.click();
   };
 
   const isProcessing = isUploading || isExtracting;
@@ -169,71 +166,24 @@ const FileUploadSection = ({ onDataExtracted, llmProvider, llmApiKey, llmModel, 
           />
           
           <div className="space-y-4">
-            <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center ${
-              uploadSuccess ? 'bg-green-100' : 'bg-blue-100'
-            }`}>
-              {isProcessing ? (
-                <Loader2 size={24} className="text-blue-600 animate-spin" />
-              ) : uploadSuccess ? (
-                <CheckCircle size={24} className="text-green-600" />
-              ) : (
-                <Upload size={24} className="text-blue-600" />
-              )}
-            </div>
+            <UploadStatus 
+              isProcessing={isProcessing}
+              uploadSuccess={uploadSuccess}
+              currentStep={currentStep}
+            />
             
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                {isProcessing ? "Processing..." : 
-                 uploadSuccess ? "Upload successful!" : 
-                 "Drop your resume here"}
-              </h3>
-              <p className="text-gray-600 mt-1">
-                {isProcessing 
-                  ? currentStep || "Processing your resume..."
-                  : uploadSuccess
-                  ? "Your profile has been updated with the extracted information"
-                  : "Supports PDF, Word (.doc/.docx), and text files • Max 10MB • AI will extract and fill your profile automatically"
-                }
-              </p>
-            </div>
+            <UploadProgress 
+              progress={progress}
+              isProcessing={isProcessing}
+            />
             
-            {isProcessing && (
-              <div className="space-y-2">
-                <Progress value={progress} className="w-full h-2" />
-                <p className="text-sm text-gray-500">{progress}% complete</p>
-              </div>
-            )}
-            
-            <div className="flex gap-2 justify-center">
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isProcessing || !canUseAI}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {isProcessing ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin mr-2" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Upload size={16} className="mr-2" />
-                    Choose File
-                  </>
-                )}
-              </Button>
-              
-              {isProcessing && !isCancelling && (
-                <Button
-                  onClick={handleCancel}
-                  variant="outline"
-                  className="border-red-300 text-red-600 hover:bg-red-50"
-                >
-                  <X size={16} className="mr-2" />
-                  Cancel
-                </Button>
-              )}
-            </div>
+            <UploadControls
+              onFileSelect={handleFileSelect}
+              onCancel={handleCancel}
+              isProcessing={isProcessing}
+              isCancelling={isCancelling}
+              canUseAI={canUseAI}
+            />
           </div>
         </div>
       </div>
