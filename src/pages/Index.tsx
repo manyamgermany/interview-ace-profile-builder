@@ -69,7 +69,7 @@ const IndexContent = () => {
       <div className="container mx-auto px-4 py-12">
         <header className="text-center mb-16 animate-fade-in-up">
           <h1 className="text-5xl font-extrabold tracking-tight bg-gradient-to-br from-white to-slate-400 bg-clip-text text-transparent mb-4">
-            Presentation Architect
+            PitchPerfect
           </h1>
           <p className="text-xl text-slate-400 max-w-3xl mx-auto">
             Engineer a bespoke, AI-powered presentation tailored to your next career move.
@@ -127,7 +127,7 @@ const IndexContent = () => {
                   <Users size={18} /> References
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="personal" className="mt-6"><PersonalInfoSection personalInfo={personalInfo} setPersonalInfo={setPersonalInfo} llmProvider={llmProvider} llmApiKey={llmApiKey} /></TabsContent>
+              <TabsContent value="personal" className="mt-6"><PersonalInfoSection personalInfo={personalInfo} setPersonalInfo={setPersonalInfo} /></TabsContent>
               <TabsContent value="photo" className="mt-6"><PhotoUploadSection profilePhoto={profilePhoto} setProfilePhoto={setProfilePhoto} /></TabsContent>
               <TabsContent value="skills" className="mt-6"><SkillsSection skills={skills} setSkills={setSkills} /></TabsContent>
               <TabsContent value="projects" className="mt-6"><ProjectsSection projects={projects} setProjects={setProjects} /></TabsContent>
