@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { generateContent } from "@/services/llmService";
 
@@ -121,6 +120,5 @@ Make it realistic and professional. Return ONLY the JSON object.`;
     isExtracting,
     setIsExtracting,
     extractDataWithAI,
-    generateLinkedInDemoData
   };
 };

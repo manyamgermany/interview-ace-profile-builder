@@ -1,13 +1,11 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Sparkles, AlertCircle } from "lucide-react";
 import FileUploadSection from "./FileUploadSection";
-import LinkedInImportSection from "./LinkedInImportSection";
 import { useState } from "react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface SmartImportCardProps {
   onDataExtracted: (data: any) => void;
@@ -34,7 +32,7 @@ const SmartImportCard = ({ onDataExtracted, llmProvider, llmApiKey }: SmartImpor
           Smart Import
         </CardTitle>
         <CardDescription className="text-base">
-          Upload your resume or import from LinkedIn to automatically fill your profile
+          Upload your resume to automatically fill your profile
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -85,19 +83,11 @@ const SmartImportCard = ({ onDataExtracted, llmProvider, llmApiKey }: SmartImpor
           canUseAI={!!canUseAI}
         />
 
-        <LinkedInImportSection
-          onDataExtracted={onDataExtracted}
-          llmProvider={llmProvider}
-          llmApiKey={llmApiKey}
-          canUseAI={!!canUseAI}
-        />
-
         <div className="bg-green-50 rounded-xl p-4 border border-green-200">
           <h4 className="font-semibold text-green-900 mb-2">✨ Smart Features</h4>
           <ul className="text-sm text-green-800 space-y-1">
             <li>• AI automatically extracts personal information, skills, and experience</li>
             <li>• Supports PDF and text resume formats</li>
-            <li>• LinkedIn import generates realistic demo data</li>
             <li>• All data can be edited and refined after import</li>
             <li>• Your data is processed securely with your chosen AI provider</li>
           </ul>
