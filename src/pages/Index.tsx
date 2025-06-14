@@ -16,6 +16,7 @@ import AchievementsSection from "@/components/AchievementsSection";
 import ReferencesSection from "@/components/ReferencesSection";
 import PracticeMode from "@/components/PracticeMode";
 import LLMProviderSettings from "@/components/LLMProviderSettings";
+import ResumeUpload from "@/components/ResumeUpload";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("personal");
@@ -43,6 +44,46 @@ const Index = () => {
   const [isPracticeMode, setIsPracticeMode] = useState(false);
   const [llmProvider, setLlmProvider] = useState("");
   const [llmApiKey, setLlmApiKey] = useState("");
+
+  const handleDataExtracted = (extractedData: any) => {
+    console.log("Extracted data:", extractedData);
+    
+    // Update personal info
+    if (extractedData.name || extractedData.title || extractedData.email || extractedData.phone || extractedData.summary || extractedData.yearsExperience) {
+      setPersonalInfo(prev => ({
+        ...prev,
+        name: extractedData.name || prev.name,
+        title: extractedData.title || prev.title,
+        email: extractedData.email || prev.email,
+        phone: extractedData.phone || prev.phone,
+        summary: extractedData.summary || prev.summary,
+        yearsExperience: extractedData.yearsExperience || prev.yearsExperience
+      }));
+    }
+
+    // Update skills
+    if (extractedData.skills && Array.isArray(extractedData.skills)) {
+      setSkills(extractedData.skills);
+    }
+
+    // Update projects
+    if (extractedData.projects && Array.isArray(extractedData.projects)) {
+      setProjects(extractedData.projects);
+    }
+
+    // Update current work
+    if (extractedData.currentWork) {
+      setCurrentWork(prev => ({
+        ...prev,
+        ...extractedData.currentWork
+      }));
+    }
+
+    // Update achievements
+    if (extractedData.achievements && Array.isArray(extractedData.achievements)) {
+      setAchievements(extractedData.achievements);
+    }
+  };
 
   const calculateProgress = () => {
     let completed = 0;
@@ -99,6 +140,15 @@ const Index = () => {
             apiKey={llmApiKey}
             onProviderChange={setLlmProvider}
             onApiKeyChange={setLlmApiKey}
+          />
+        </div>
+
+        {/* Resume Upload */}
+        <div className="animate-fade-in-up mb-8" style={{ animationDelay: '0.08s' }}>
+          <ResumeUpload 
+            onDataExtracted={handleDataExtracted}
+            llmProvider={llmProvider}
+            llmApiKey={llmApiKey}
           />
         </div>
 
